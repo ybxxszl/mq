@@ -30,11 +30,9 @@ public class MailUtil {
 	 * @param subject
 	 *            邮件标题
 	 * @param text
-	 *            邮件正文(正文和图片的代码)
-	 * @param images
-	 *            邮件图片(数组)
+	 *            邮件正文
 	 * @param attachs
-	 *            邮件附件(数组)
+	 *            邮件附件
 	 * @param recipientAddress
 	 *            收件人地址
 	 * @param fromAddress
@@ -47,8 +45,8 @@ public class MailUtil {
 	 *            邮件服务器
 	 * @return 发送结果
 	 */
-	public static boolean sendMail(String subject, String text, String[] images, String[] attachs,
-			String recipientAddress, String fromAddress, String account, String code, String host) {
+	public static boolean sendMail(String subject, String text, String[] attachs, String recipientAddress,
+			String fromAddress, String account, String code, String host) {
 
 		try {
 
@@ -65,7 +63,7 @@ public class MailUtil {
 			transport.connect(host, account, code);
 
 			// 创建邮件
-			Message message = createMail(subject, text, images, attachs, recipientAddress, fromAddress, session);
+			Message message = createMail(subject, text, attachs, recipientAddress, fromAddress, session);
 
 			// 发送邮件
 			transport.sendMessage(message, message.getAllRecipients());
@@ -94,10 +92,8 @@ public class MailUtil {
 	 *            邮件标题
 	 * @param text
 	 *            邮件正文
-	 * @param images
-	 *            邮件图片数组
 	 * @param attachs
-	 *            邮件附件数组
+	 *            邮件附件
 	 * @param recipientAddress
 	 *            收件人地址
 	 * @param fromAddress
@@ -110,8 +106,8 @@ public class MailUtil {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private static MimeMessage createMail(String subject, String text, String[] images, String[] attachs,
-			String recipientAddress, String fromAddress, Session session)
+	private static MimeMessage createMail(String subject, String text, String[] attachs, String recipientAddress,
+			String fromAddress, Session session)
 			throws AddressException, MessagingException, FileNotFoundException, IOException {
 
 		MimeMessage mimeMessage = new MimeMessage(session);
@@ -125,33 +121,13 @@ public class MailUtil {
 		// 邮件的标题
 		mimeMessage.setSubject(subject);
 
-		// 设置整体与附件的关系
-		MimeMultipart textImageAndAttach = new MimeMultipart();
-
-		// 设置正文与图片的关系
-		MimeMultipart textAndImage = new MimeMultipart();
+		// 设置正文与附件的关系
+		MimeMultipart textAndAttach = new MimeMultipart();
 
 		// 邮件的正文
 		MimeBodyPart bodyText = new MimeBodyPart();
 		bodyText.setContent(text, "text/html;charset=UTF-8");
-		textAndImage.addBodyPart(bodyText);
-
-		// 邮件的图片
-		DataHandler handlerImage = null;
-		for (int i = 0; i < images.length; i++) {
-			handlerImage = new DataHandler(new FileDataSource(images[i]));
-			MimeBodyPart bodyImage = new MimeBodyPart();
-			bodyImage.setDataHandler(handlerImage);
-			bodyImage.setContentID(handlerImage.getName());
-			textAndImage.addBodyPart(bodyImage);
-		}
-
-		textAndImage.setSubType("related");
-
-		// 将正文和图片看做整体
-		MimeBodyPart textImage = new MimeBodyPart();
-		textImage.setContent(textAndImage);
-		textImageAndAttach.addBodyPart(textImage);
+		textAndAttach.addBodyPart(bodyText);
 
 		// 邮件的附件
 		DataHandler handlerAttach = null;
@@ -160,12 +136,12 @@ public class MailUtil {
 			MimeBodyPart bodyAttach = new MimeBodyPart();
 			bodyAttach.setDataHandler(handlerAttach);
 			bodyAttach.setFileName(MimeUtility.encodeText(handlerAttach.getName()));
-			textImageAndAttach.addBodyPart(bodyAttach);
+			textAndAttach.addBodyPart(bodyAttach);
 		}
 
-		textImageAndAttach.setSubType("mixed");
+		textAndAttach.setSubType("mixed");
 
-		mimeMessage.setContent(textImageAndAttach);
+		mimeMessage.setContent(textAndAttach);
 
 		mimeMessage.saveChanges();
 
@@ -204,11 +180,10 @@ public class MailUtil {
 
 	public static void main(String[] args) {
 
-		String text = "猫<br /><img src='cid:mao1.jpg' /><br /><img src='cid:mao2.jpg' />";
-		String[] images = { "D:\\mao1.jpg", "D:\\mao2.jpg" };
-		String[] attachs = { "D:\\猫1.zip", "D:\\猫2.zip" };
+		String text = "猫";
+		String[] attachs = {};
 
-		boolean f = sendMail("测试标题", text, images, attachs, "1062837400@qq.com", "1062837400@qq.com", "1062837400",
+		boolean f = sendMail("猫", text, attachs, "1062837400@qq.com", "1062837400@qq.com", "1062837400",
 				"bddomwnwxqlmbcef", "smtp.qq.com");
 
 		if (f) {

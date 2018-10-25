@@ -1,17 +1,23 @@
 package com.wjy.util;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 /*
  * 邮件工具类
@@ -22,9 +28,13 @@ public class MailUtil {
 	 * 发送邮件
 	 * 
 	 * @param subject
-	 *            邮件主题
-	 * @param content
-	 *            邮件内容
+	 *            邮件标题
+	 * @param text
+	 *            邮件正文(正文和图片的代码)
+	 * @param images
+	 *            邮件图片(数组)
+	 * @param attachs
+	 *            邮件附件(数组)
 	 * @param recipientAddress
 	 *            收件人地址
 	 * @param fromAddress
@@ -37,8 +47,8 @@ public class MailUtil {
 	 *            邮件服务器
 	 * @return 发送结果
 	 */
-	public static boolean sendMail(String subject, String content, String recipientAddress, String fromAddress,
-			String account, String code, String host) {
+	public static boolean sendMail(String subject, String text, String[] images, String[] attachs,
+			String recipientAddress, String fromAddress, String account, String code, String host) {
 
 		try {
 
@@ -55,7 +65,7 @@ public class MailUtil {
 			transport.connect(host, account, code);
 
 			// 创建邮件
-			Message message = createMail(subject, content, recipientAddress, fromAddress, session);
+			Message message = createMail(subject, text, images, attachs, recipientAddress, fromAddress, session);
 
 			// 发送邮件
 			transport.sendMessage(message, message.getAllRecipients());
@@ -77,6 +87,104 @@ public class MailUtil {
 
 	}
 
+	/**
+	 * 创建邮件
+	 * 
+	 * @param subject
+	 *            邮件标题
+	 * @param text
+	 *            邮件正文
+	 * @param images
+	 *            邮件图片数组
+	 * @param attachs
+	 *            邮件附件数组
+	 * @param recipientAddress
+	 *            收件人地址
+	 * @param fromAddress
+	 *            发件人地址
+	 * @param session
+	 *            Session
+	 * @return 邮件
+	 * @throws AddressException
+	 * @throws MessagingException
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static MimeMessage createMail(String subject, String text, String[] images, String[] attachs,
+			String recipientAddress, String fromAddress, Session session)
+			throws AddressException, MessagingException, FileNotFoundException, IOException {
+
+		MimeMessage mimeMessage = new MimeMessage(session);
+
+		// 邮件的发件人
+		mimeMessage.setFrom(new InternetAddress(fromAddress));
+
+		// 邮件的收件人
+		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientAddress));
+
+		// 邮件的标题
+		mimeMessage.setSubject(subject);
+
+		// 设置整体与附件的关系
+		MimeMultipart textImageAndAttach = new MimeMultipart();
+
+		// 设置正文与图片的关系
+		MimeMultipart textAndImage = new MimeMultipart();
+
+		// 邮件的正文
+		MimeBodyPart bodyText = new MimeBodyPart();
+		bodyText.setContent(text, "text/html;charset=UTF-8");
+		textAndImage.addBodyPart(bodyText);
+
+		// 邮件的图片
+		DataHandler handlerImage = null;
+		for (int i = 0; i < images.length; i++) {
+			handlerImage = new DataHandler(new FileDataSource(images[i]));
+			MimeBodyPart bodyImage = new MimeBodyPart();
+			bodyImage.setDataHandler(handlerImage);
+			bodyImage.setContentID(handlerImage.getName());
+			textAndImage.addBodyPart(bodyImage);
+		}
+
+		textAndImage.setSubType("related");
+
+		// 将正文和图片看做整体
+		MimeBodyPart textImage = new MimeBodyPart();
+		textImage.setContent(textAndImage);
+		textImageAndAttach.addBodyPart(textImage);
+
+		// 邮件的附件
+		DataHandler handlerAttach = null;
+		for (int i = 0; i < attachs.length; i++) {
+			handlerAttach = new DataHandler(new FileDataSource(attachs[i]));
+			MimeBodyPart bodyAttach = new MimeBodyPart();
+			bodyAttach.setDataHandler(handlerAttach);
+			bodyAttach.setFileName(MimeUtility.encodeText(handlerAttach.getName()));
+			textImageAndAttach.addBodyPart(bodyAttach);
+		}
+
+		textImageAndAttach.setSubType("mixed");
+
+		mimeMessage.setContent(textImageAndAttach);
+
+		mimeMessage.saveChanges();
+
+		// 保存到本地
+		mimeMessage.writeTo(new FileOutputStream("D:\\JavaMail.eml"));
+
+		// 返回邮件
+		return mimeMessage;
+
+	}
+
+	/**
+	 * 获取配置
+	 * 
+	 * @param host
+	 *            邮件服务器
+	 * @return 配置
+	 * @throws GeneralSecurityException
+	 */
 	private static Properties getProperties(String host) throws GeneralSecurityException {
 
 		Properties props = new Properties();
@@ -94,33 +202,16 @@ public class MailUtil {
 
 	}
 
-	public static MimeMessage createMail(String subject, String content, String recipientAddress, String fromAddress,
-			Session session) throws AddressException, MessagingException, FileNotFoundException, IOException {
-
-		MimeMessage mimeMessage = new MimeMessage(session);
-
-		// 邮件的发件人
-		mimeMessage.setFrom(new InternetAddress(fromAddress));
-
-		// 邮件的收件人
-		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientAddress));
-
-		// 邮件的标题
-		mimeMessage.setSubject(subject);
-
-		// 邮件的内容
-		mimeMessage.setContent(content, "text/html;charset=UTF-8");
-
-		return mimeMessage;
-
-	}
-
 	public static void main(String[] args) {
 
-		boolean flag = sendMail("测试主题", "测试内容", "1062837400@qq.com", "1062837400@qq.com", "1062837400",
+		String text = "猫<br /><img src='cid:mao1.jpg' /><br /><img src='cid:mao2.jpg' />";
+		String[] images = { "D:\\mao1.jpg", "D:\\mao2.jpg" };
+		String[] attachs = { "D:\\猫1.zip", "D:\\猫2.zip" };
+
+		boolean f = sendMail("测试标题", text, images, attachs, "1062837400@qq.com", "1062837400@qq.com", "1062837400",
 				"bddomwnwxqlmbcef", "smtp.qq.com");
 
-		if (flag) {
+		if (f) {
 
 			System.out.println("发送成功");
 

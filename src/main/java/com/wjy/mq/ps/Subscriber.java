@@ -4,10 +4,10 @@ import com.wjy.jedis.RedisUtil;
 
 public class Subscriber {
 
-	public static void subscrib(JedisPubSubListener listener, String... messages) {
+    public static void subscrib(JedisPubSubListener listener, String... messages) {
 
-		RedisUtil.subscribe(listener, messages);
+        RedisUtil.subscribe(listener, messages);
 
-	}
+    }
 
 }

@@ -4,12 +4,12 @@ import com.wjy.jedis.RedisUtil;
 
 public class Pusher {
 
-	public static int push(String key, String message) {
+    public static int push(String key, String message) {
 
-		int num = RedisUtil.lpush(key, message);
+        int num = RedisUtil.lpush(key, message);
 
-		return num;
+        return num;
 
-	}
+    }
 
 }

@@ -1,17 +1,17 @@
 package com.wjy.mq.pc;
 
-import java.util.List;
-
 import com.wjy.jedis.RedisUtil;
+
+import java.util.List;
 
 public class Poper {
 
-	public static String pop(int timeout, String... keys) {
+    public static String pop(int timeout, String... keys) {
 
-		List<String> list = RedisUtil.brpop(timeout, keys);
+        List<String> list = RedisUtil.brpop(timeout, keys);
 
-		return list.get(1);
+        return list.get(1);
 
-	}
+    }
 
 }

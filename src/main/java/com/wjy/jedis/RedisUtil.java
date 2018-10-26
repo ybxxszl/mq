@@ -2,7 +2,7 @@ package com.wjy.jedis;
 
 import java.util.List;
 
-import com.wjy.mq.redismq.ps.JedisPubSubListener;
+import com.wjy.mq.ps.JedisPubSubListener;
 
 import redis.clients.jedis.Jedis;
 

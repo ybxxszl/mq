@@ -28,11 +28,12 @@ public class MailUtil {
      * @param fromAddress      发件人地址
      * @param account          账号
      * @param code             授权码
-     * @param host             邮件服务器
      * @return 发送结果
      */
     public static boolean sendMail(String subject, String text, String[] attachs, String recipientAddress,
-                                   String fromAddress, String account, String code, String host) {
+                                   String fromAddress, String account, String code) {
+
+        String host = "smtp." + recipientAddress.split("@")[1].split(".")[0] + ".com";
 
         try {
 
@@ -163,7 +164,7 @@ public class MailUtil {
         String[] attachs = {};
 
         boolean f = sendMail("猫", text, attachs, "1062837400@qq.com", "1062837400@qq.com", "1062837400",
-                "bddomwnwxqlmbcef", "smtp.qq.com");
+                "bddomwnwxqlmbcef");
 
         if (f) {
 

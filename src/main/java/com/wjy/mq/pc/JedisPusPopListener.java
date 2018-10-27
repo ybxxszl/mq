@@ -28,11 +28,11 @@ public class JedisPusPopListener {
 
             String message = Poper.pop(0, keys);
 
-            MailInfo info = JSONUtil.jsonToPojo(message, MailInfo.class);
+            MailInfo mailInfo = JSONUtil.jsonToPojo(message, MailInfo.class);
 
-            boolean flag = MailUtil.sendMail("验证码", info.getText(), new String[]{}, info.getRecipientAddress(), fromAddress, account, code);
+            boolean flag = MailUtil.sendMail("验证码", mailInfo.getText(), new String[]{}, mailInfo.getRecipientAddress(), fromAddress, account, code);
 
-            System.out.print(info.getRecipientAddress() + "：" + info.getText());
+            System.out.print(mailInfo.getRecipientAddress() + "：" + mailInfo.getText());
 
             if (flag) {
 

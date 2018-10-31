@@ -1,13 +1,15 @@
 package com.wjy.controller;
 
-import com.wjy.bean.MQInfo;
-import com.wjy.bean.MailInfo;
-import com.wjy.bean.SMSInfo;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSONObject;
 import com.wjy.mq.pc.Pusher;
 import com.wjy.mq.ps.Publisher;
 import com.wjy.result.JSONResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.wjy.util.HttpClientUtil;
 
 /**
  * @Date 2018/10/27
@@ -17,59 +19,60 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MQController {
 
-    @PostMapping(value = "/postMsg")
-    public JSONResult postMsg(MQInfo mqInfo) {
+	@PostMapping(value = "/postMsg")
+	public JSONResult postMsg(HttpServletRequest request) {
 
-        String type = mqInfo.getType();
-        String name = mqInfo.getName();
+		int num = 0;
 
-        MailInfo mailInfo = mqInfo.getMailInfo();
-        SMSInfo smsInfo = mqInfo.getSMSInfo();
+		try {
 
-        int num = 0;
+			JSONObject object = HttpClientUtil.getJSON(request);
 
-        try {
+			String type = object.getString("type");
+			String name = object.getString("name");
+			JSONObject mailInfo = object.getJSONObject("mailInfo");
+			JSONObject smsInfo = object.getJSONObject("smsInfo");
 
-            if ("pc".equals(type)) {
+			if ("pc".equals(type)) {
 
-                if (name.contains("Mail")) {
+				if (name.contains("Mail")) {
 
-                    num = Pusher.push(name, mailInfo.toString());
+					num = Pusher.push(name, mailInfo.toString());
 
-                }
+				}
 
-                if (name.contains("SMS")) {
+				if (name.contains("SMS")) {
 
-                    num = Pusher.push(name, smsInfo.toString());
+					num = Pusher.push(name, smsInfo.toString());
 
-                }
+				}
 
-            }
+			}
 
-            if ("ps".equals(type)) {
+			if ("ps".equals(type)) {
 
-                if (name.contains("Mail")) {
+				if (name.contains("Mail")) {
 
-                    num = Publisher.publish(name, mailInfo.toString());
+					num = Publisher.publish(name, mailInfo.toString());
 
-                }
+				}
 
-                if (name.contains("SMS")) {
+				if (name.contains("SMS")) {
 
-                    num = Publisher.publish(name, smsInfo.toString());
+					num = Publisher.publish(name, smsInfo.toString());
 
-                }
+				}
 
-            }
+			}
 
-            return JSONResult.ok(num);
+			return JSONResult.ok(num);
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            return JSONResult.errorException(e.getMessage());
+			return JSONResult.errorException(e.getMessage());
 
-        }
+		}
 
-    }
+	}
 
 }

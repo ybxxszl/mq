@@ -1,7 +1,6 @@
 package com.wjy.mq.pc;
 
-import com.wjy.bean.MailInfo;
-import com.wjy.util.JSONUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.wjy.util.MailUtil;
 import com.wjy.util.PropertiesUtil;
 
@@ -10,42 +9,46 @@ import com.wjy.util.PropertiesUtil;
  */
 public class JedisPusPopListener {
 
-    private static String fromAddress;
-    private static String account;
-    private static String code;
+	private static String fromAddress;
+	private static String account;
+	private static String code;
 
-    static {
+	static {
 
-        fromAddress = PropertiesUtil.getValue("mail.fromAddress");
-        account = PropertiesUtil.getValue("mail.account");
-        code = PropertiesUtil.getValue("mail.code");
+		fromAddress = PropertiesUtil.getValue("mail.fromAddress");
+		account = PropertiesUtil.getValue("mail.account");
+		code = PropertiesUtil.getValue("mail.code");
 
-    }
+	}
 
-    public void onMessage(String... keys) {
+	public void onMessage(String... keys) {
 
-        while (true) {
+		while (true) {
 
-            String message = Poper.pop(0, keys);
+			String message = Poper.pop(0, keys);
 
-            MailInfo mailInfo = JSONUtil.jsonToPojo(message, MailInfo.class);
+			JSONObject object = JSONObject.parseObject(message);
 
-            boolean flag = MailUtil.sendMail("验证码", mailInfo.getText(), new String[]{}, mailInfo.getRecipientAddress(), fromAddress, account, code);
+			String text = object.getString("text");
+			String recipientAddress = object.getString("recipientAddress");
 
-            System.out.print(mailInfo.getRecipientAddress() + "：" + mailInfo.getText());
+			boolean flag = MailUtil.sendMail("验证码", text, new String[] {}, recipientAddress, fromAddress, account,
+					code);
 
-            if (flag) {
+			System.out.print(recipientAddress + "：" + text);
 
-                System.out.println(" --> 邮件发送成功！！！");
+			if (flag) {
 
-            } else {
+				System.out.println(" --> 邮件发送成功！！！");
 
-                System.out.println(" --> 邮件发送失败！！！");
+			} else {
 
-            }
+				System.out.println(" --> 邮件发送失败！！！");
 
-        }
+			}
 
-    }
+		}
+
+	}
 
 }

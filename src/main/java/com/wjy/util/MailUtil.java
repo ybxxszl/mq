@@ -8,7 +8,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.*;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
@@ -140,7 +139,7 @@ public class MailUtil {
 		mimeMessage.saveChanges();
 
 		// 保存到本地
-		mimeMessage.writeTo(new FileOutputStream("D:\\JavaMail.eml"));
+		// mimeMessage.writeTo(new FileOutputStream("D:\\JavaMail.eml"));
 
 		// 返回邮件
 		return mimeMessage;

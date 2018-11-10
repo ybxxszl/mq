@@ -19,7 +19,7 @@ import com.wjy.util.HttpClientUtil;
 @RestController
 public class MQController {
 
-	@PostMapping(value = "/postMsg")
+	@PostMapping(value = "/postVerifyCode")
 	public JSONResult postMsg(HttpServletRequest request) {
 
 		int num = 0;

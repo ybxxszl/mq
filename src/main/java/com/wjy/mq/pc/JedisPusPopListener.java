@@ -9,46 +9,46 @@ import com.wjy.util.PropertiesUtil;
  */
 public class JedisPusPopListener {
 
-	private static String fromAddress;
-	private static String account;
-	private static String code;
+    private static String fromAddress;
+    private static String account;
+    private static String code;
 
-	static {
+    static {
 
-		fromAddress = PropertiesUtil.getValue("mail.fromAddress");
-		account = PropertiesUtil.getValue("mail.account");
-		code = PropertiesUtil.getValue("mail.code");
+        fromAddress = PropertiesUtil.getValue("mail.fromAddress");
+        account = PropertiesUtil.getValue("mail.account");
+        code = PropertiesUtil.getValue("mail.code");
 
-	}
+    }
 
-	public void onMessage(String... keys) {
+    public void onMessage(String... keys) {
 
-		while (true) {
+        while (true) {
 
-			String message = Poper.pop(0, keys);
+            String message = Poper.pop(0, keys);
 
-			JSONObject object = JSONObject.parseObject(message);
+            JSONObject object = JSONObject.parseObject(message);
 
-			String text = object.getString("text");
-			String recipientAddress = object.getString("recipientAddress");
+            String text = object.getString("text");
+            String recipientAddress = object.getString("recipientAddress");
 
-			boolean flag = MailUtil.sendMail("验证码", text, new String[] {}, recipientAddress, fromAddress, account,
-					code);
+            boolean flag = MailUtil.sendMail("验证码", text, new String[]{}, recipientAddress, fromAddress, account,
+                    code);
 
-			System.out.print(recipientAddress + "：" + text);
+            System.out.print(recipientAddress + "：" + text);
 
-			if (flag) {
+            if (flag) {
 
-				System.out.println(" --> 邮件发送成功！！！");
+                System.out.println(" --> 邮件发送成功！！！");
 
-			} else {
+            } else {
 
-				System.out.println(" --> 邮件发送失败！！！");
+                System.out.println(" --> 邮件发送失败！！！");
 
-			}
+            }
 
-		}
+        }
 
-	}
+    }
 
 }
